@@ -19,7 +19,7 @@ app.use(async (ctx, next) => {
     }
 });
 
-app.use(morgan('dev'));
+app.use(morgan('combined'));
 app.use(router.routes());
 app.use(router.allowedMethods());
 
