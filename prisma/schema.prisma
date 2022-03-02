@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = [ "extendedIndexes", "interactiveTransactions" ]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  to_do
+  doing
+  done
+
+  @@map("task_status")
+}
+
+model User {
+  id             String       @id @db.Uuid @default(dbgenerated("uuid_generate_v1mc()"))
+  requestedTasks Task[]       @relation("taskxuser")
+  ownedTasks     TaskOwners[] @relation("ownerxuser")
+  @@map("users")
+}
+
+model Task {
+  id          String        @id @db.Uuid @default(dbgenerated("uuid_generate_v1mc()"))
+  title       String
+  description String?
+  status      TaskStatus
+  dueDate     DateTime      @map("due_date")
+  children    Task[]        @relation("taskxtask")
+  requester   User          @relation("taskxuser", fields: [requesterId], references: [id])
+  requesterId String        @db.Uuid @map("requester_id")
+  parent      Task?         @relation("taskxtask", fields: [parentId], references: [id])
+  parentId    String?       @db.Uuid @map("parent_id")
+  owners      TaskOwners[]  @relation("taskoxwners")
+
+  @@map("tasks")
+  @@index([dueDate(sort: Desc)])
+}
+
+model TaskOwners {
+  task    Task   @relation("taskoxwners", fields: [taskId], references: [id])
+  taskId  String @db.Uuid
+  owner   User   @relation("ownerxuser", fields: [ownerId], references: [id])
+  ownerId String @db.Uuid
+
+  @@map("task_owners")
+  @@id([taskId, ownerId])
+}

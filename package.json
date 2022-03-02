@@ -17,6 +17,7 @@
   "author": "Gustavo B.",
   "license": "MIT",
   "dependencies": {
+    "@prisma/client": "^3.10.0",
     "cross-env": "^7.0.3",
     "koa": "^2.13.4",
     "koa-joi-router": "^8.0.0",
@@ -26,6 +27,7 @@
     "eslint": "^8.10.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.4",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "prisma": "^3.10.0"
   }
 }
