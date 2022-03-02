@@ -19,3 +19,10 @@ exports.getTasks = async (ctx) => {
     const tasks = await taskService.getTasks(limit);
     ctx.body = tasks.map((t) => taskMapper.toJson(t));
 };
+
+exports.updateStatus = async (ctx) => {
+    const { id } = ctx.params;
+    const { status } = ctx.request.body;
+    await taskService.changeTaskStatus(id, status);
+    ctx.status = 204;
+};

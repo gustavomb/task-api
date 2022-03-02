@@ -54,4 +54,19 @@ router.route({
     handler: taskController.getTasks,
 });
 
+router.route({
+    method: 'put',
+    path: '/:id/status',
+    validate: {
+        params: {
+            id: Joi.string().uuid(),
+        },
+        type: 'json',
+        body: {
+            status: taskStatusValues,
+        },
+    },
+    handler: taskController.updateStatus,
+});
+
 module.exports = router.middleware();

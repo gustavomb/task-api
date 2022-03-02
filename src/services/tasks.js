@@ -112,3 +112,78 @@ exports.createTask = async (task) => {
         },
     });
 };
+
+async function taskHasChildren(t) {
+    if (t.parentId) return false;
+
+    const count = await prisma.task.groupBy({
+        by: ['parentId'],
+        where: { parentId: t.id },
+        _count: {
+            id: true,
+        },
+    });
+    return count[0]._count.id > 0;
+}
+
+async function updateTask(t, status, client = prisma) {
+    return client.task.update({
+        where: { id: t.id },
+        data: {
+            status,
+        },
+    });
+}
+
+async function updateStatusByChildrenStatus(t, client = prisma) {
+    if (t.parentId === undefined || t.parentId === null) {
+        return;
+    }
+
+    const parent = await client.task.findUnique({
+        where: { id: t.parentId },
+        include: { children: true },
+    });
+
+    let { status } = parent;
+    const tasksDone = parent.children.filter((child) => child.status === TaskStatus.done);
+
+    if (tasksDone.length === parent.children.length) {
+        status = TaskStatus.done;
+    } else if (tasksDone.length > 0) {
+        status = TaskStatus.doing;
+    }
+
+    if (parent.status !== status) {
+        await updateTask(parent, status, client);
+    }
+}
+
+exports.changeTaskStatus = async (taskId, status) => {
+    const t = await prisma.task.findUnique({
+        where: { id: taskId },
+        select: {
+            id: true,
+            status: true,
+            parentId: true,
+        },
+    });
+
+    // nothing to do
+    if (t.status === status) {
+        return;
+    }
+
+    const hasParent = t.parentId !== null;
+
+    if (await taskHasChildren(t)) {
+        throw new Error('cannot change the status, either some children tasks are pending or all children tasks are done');
+    } else if (hasParent && status === TaskStatus.doing) {
+        throw new Error(`child tasks can be either '${TaskStatus.done}' or '${TaskStatus.to_do}'`);
+    }
+
+    await prisma.$transaction(async (client) => {
+        await updateTask(t, status, client);
+        await updateStatusByChildrenStatus(t, client);
+    });
+};
