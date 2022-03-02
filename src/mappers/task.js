@@ -27,7 +27,7 @@ exports.toJson = (model) => ({
     requester: model.requesterId,
     owners: model.owners ? model.owners.map((o) => o.ownerId) : undefined,
     parent: model.parent ? { id: model.parent.id, title: model.parent.title } : undefined,
-    children: model.children ? model.children.map((c) => ({
+    children: model.children && model.children.length > 0 ? model.children.map((c) => ({
         id: c.id,
         title: c.title,
     })) : undefined,
