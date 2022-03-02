@@ -6,6 +6,7 @@ exports.createTask = async (ctx) => {
     const newTask = await taskService.createTask(task);
     ctx.status = 201;
     ctx.body = taskMapper.toJson(newTask);
+    ctx.response.set('Location', `${ctx.request.origin}${ctx.url}/${newTask.id}`);
 };
 
 exports.getTask = async (ctx) => {

@@ -8,4 +8,5 @@ exports.createUser = async (ctx) => {
         id: newUser.id,
         name: newUser.name,
     };
+    ctx.response.set('Location', `${ctx.request.origin}${ctx.url}/${newUser.id}`);
 };
