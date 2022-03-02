@@ -39,6 +39,11 @@ exports.getTasks = async (limit) => (
             requester: true,
             owners: true,
         },
+        orderBy: [
+            {
+                dueDate: 'desc',
+            },
+        ],
         take: limit,
     })
 );
