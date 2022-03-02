@@ -8,6 +8,7 @@ CREATE TYPE "task_status" AS ENUM ('to_do', 'doing', 'done');
 -- CreateTable
 CREATE TABLE "users" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v1mc(),
+    "name" TEXT NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -32,6 +33,9 @@ CREATE TABLE "task_owners" (
 
     CONSTRAINT "task_owners_pkey" PRIMARY KEY ("taskId","ownerId")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_name_key" ON "users"("name");
 
 -- CreateIndex
 CREATE INDEX "tasks_due_date_idx" ON "tasks"("due_date" DESC);

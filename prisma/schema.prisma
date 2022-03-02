@@ -18,6 +18,7 @@ enum TaskStatus {
 
 model User {
   id             String       @id @db.Uuid @default(dbgenerated("uuid_generate_v1mc()"))
+  name           String       @unique
   requestedTasks Task[]       @relation("taskxuser")
   ownedTasks     TaskOwners[] @relation("ownerxuser")
   @@map("users")
