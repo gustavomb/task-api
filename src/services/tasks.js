@@ -2,6 +2,46 @@ const { PrismaClient, TaskStatus } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+exports.getTask = async (taskId) => (
+    prisma.task.findUnique({
+        where: { id: taskId },
+        include: {
+            parent: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+            children: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+            owners: {
+                select: {
+                    ownerId: true,
+                },
+            },
+        },
+    })
+);
+
+exports.getTasks = async (limit) => (
+    prisma.task.findMany({
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            status: true,
+            dueDate: true,
+            requester: true,
+            owners: true,
+        },
+        take: limit,
+    })
+);
+
 exports.createTask = async (task) => {
     const hasChildren = Array.isArray(task.children) && task.children.length > 0;
     if (hasChildren) {

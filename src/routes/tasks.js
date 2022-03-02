@@ -32,4 +32,26 @@ router.route({
     handler: taskController.createTask,
 });
 
+router.route({
+    method: 'get',
+    path: '/:id',
+    validate: {
+        params: {
+            id: Joi.string().uuid(),
+        },
+    },
+    handler: taskController.getTask,
+});
+
+router.route({
+    method: 'get',
+    path: '/',
+    validate: {
+        query: {
+            limit: Joi.number().integer(),
+        },
+    },
+    handler: taskController.getTasks,
+});
+
 module.exports = router.middleware();

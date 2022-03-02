@@ -7,3 +7,15 @@ exports.createTask = async (ctx) => {
     ctx.status = 201;
     ctx.body = taskMapper.toJson(newTask);
 };
+
+exports.getTask = async (ctx) => {
+    const { id } = ctx.params;
+    const task = await taskService.getTask(id);
+    if (task) ctx.body = taskMapper.toJson(task);
+};
+
+exports.getTasks = async (ctx) => {
+    const { limit } = ctx.query;
+    const tasks = await taskService.getTasks(limit);
+    ctx.body = tasks.map((t) => taskMapper.toJson(t));
+};
