@@ -1,4 +1,5 @@
 const { PrismaClient, TaskStatus } = require('@prisma/client');
+const { DomainError } = require('errors');
 
 const prisma = new PrismaClient();
 
@@ -51,7 +52,7 @@ exports.createTask = async (task) => {
             .filter((c) => c.due_date > task.due_date).length > 0;
 
         if (!parentMatchChildDate || parentHasHighestDate) {
-            throw new Error('The due date of parent task must match the highest due date among their children');
+            throw new DomainError('The due date of parent task must match the highest due date among their children');
         }
 
         const hasTodoChildren = task.children
@@ -62,7 +63,7 @@ exports.createTask = async (task) => {
             .filter((c) => c.status === TaskStatus.done).length > 0;
 
         if (hasDoingChildren) {
-            throw new Error('children task status can be either to_do or doing');
+            throw new DomainError('Children task status can be either to_do or doing');
         }
 
         const hasParentInvalidStatus = (task.status === TaskStatus.done && hasTodoChildren)
@@ -70,7 +71,7 @@ exports.createTask = async (task) => {
                 || (task.status !== TaskStatus.doing && hasTodoChildren && hasDoneChildren);
 
         if (hasParentInvalidStatus) {
-            throw new Error('a parent tasks with to_do or done status must match all its children status, otherwise it must be doing');
+            throw new DomainError('A parent tasks with to_do or done status must match all it\'s children status, otherwise it must be doing');
         }
     }
 
@@ -177,9 +178,9 @@ exports.changeTaskStatus = async (taskId, status) => {
     const hasParent = t.parentId !== null;
 
     if (await taskHasChildren(t)) {
-        throw new Error('cannot change the status, either some children tasks are pending or all children tasks are done');
+        throw new DomainError('Cannot change the status, either some children tasks are pending or all children tasks are done');
     } else if (hasParent && status === TaskStatus.doing) {
-        throw new Error(`child tasks can be either '${TaskStatus.done}' or '${TaskStatus.to_do}'`);
+        throw new DomainError('Child tasks can be either done or doing');
     }
 
     await prisma.$transaction(async (client) => {
